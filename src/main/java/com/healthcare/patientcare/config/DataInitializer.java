@@ -3,6 +3,7 @@ package com.healthcare.patientcare.config;
 import com.healthcare.patientcare.entity.Patient;
 import com.healthcare.patientcare.entity.ProgressNote;
 import com.healthcare.patientcare.entity.CarePlan;
+import com.healthcare.patientcare.entity.Appointment;
 import com.healthcare.patientcare.repository.PatientRepository;
 import com.healthcare.patientcare.repository.ProgressNoteRepository;
 import com.healthcare.patientcare.repository.CarePlanRepository;
@@ -23,6 +24,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private CarePlanRepository carePlanRepository;
+
+    @Autowired
+    private com.healthcare.patientcare.repository.AppointmentRepository appointmentRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -95,6 +99,24 @@ public class DataInitializer implements CommandLineRunner {
         carePlan2.setStatus("Active");
         carePlan2.setPatient(patient2);
         carePlanRepository.save(carePlan2);
+
+        // Sample Appointments for Patient 1
+        Appointment appt1 = new Appointment();
+        appt1.setAppointmentDate(LocalDateTime.now().plusDays(3).withHour(10).withMinute(0));
+        appt1.setReason("Blood pressure follow-up");
+        appt1.setProvider("Dr. Sarah Johnson");
+        appt1.setStatus("Scheduled");
+        appt1.setPatient(patient1);
+        appointmentRepository.save(appt1);
+
+        // Sample Appointment for Patient 2
+        Appointment appt2 = new Appointment();
+        appt2.setAppointmentDate(LocalDateTime.now().plusDays(7).withHour(9).withMinute(30));
+        appt2.setReason("Diabetes management review");
+        appt2.setProvider("Dr. Michael Chen");
+        appt2.setStatus("Scheduled");
+        appt2.setPatient(patient2);
+        appointmentRepository.save(appt2);
 
         System.out.println("Sample data initialized successfully!");
     }

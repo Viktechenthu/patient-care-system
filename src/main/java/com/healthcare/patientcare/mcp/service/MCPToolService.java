@@ -2,6 +2,7 @@ package com.healthcare.patientcare.mcp.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.patientcare.entity.CarePlan;
+import com.healthcare.patientcare.entity.Appointment;
 import com.healthcare.patientcare.entity.Patient;
 import com.healthcare.patientcare.entity.ProgressNote;
 import com.healthcare.patientcare.mcp.annotation.Tool;
@@ -20,6 +21,9 @@ public class MCPToolService {
 
     @Autowired
     private PatientService patientService;
+
+    @Autowired
+    private com.healthcare.patientcare.service.AppointmentService appointmentService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -185,6 +189,60 @@ public class MCPToolService {
 
             Patient created = patientService.createPatient(patient);
             return objectMapper.writeValueAsString(created);
+        } catch (Exception e) {
+            return "{\"error\": \"" + e.getMessage() + "\"}";
+        }
+    }
+
+    @Tool(
+            name = "schedule_appointment",
+            description = "Schedule an appointment for a patient"
+    )
+    public String scheduleAppointment(
+            @ToolParam(name = "patient_id", description = "Numeric ID of the patient") Long patientId,
+            @ToolParam(name = "appointment_date", description = "Appointment date and time (ISO-8601)") String appointmentDate,
+            @ToolParam(name = "reason", description = "Reason for visit") String reason,
+            @ToolParam(name = "provider", description = "Provider name") String provider
+    ) {
+        try {
+            Appointment appt = new Appointment();
+            appt.setAppointmentDate(LocalDateTime.parse(appointmentDate));
+            appt.setReason(reason);
+            appt.setProvider(provider);
+            appt.setStatus("Scheduled");
+
+            Appointment created = appointmentService.createAppointment(patientId, appt);
+            return objectMapper.writeValueAsString(created);
+        } catch (Exception e) {
+            return "{\"error\": \"" + e.getMessage() + "\"}";
+        }
+    }
+
+    @Tool(
+            name = "get_appointments",
+            description = "Get appointments for a patient"
+    )
+    public String getAppointments(
+            @ToolParam(name = "patient_id", description = "Numeric ID of the patient") Long patientId
+    ) {
+        try {
+            List<Appointment> appts = appointmentService.getAppointmentsByPatientId(patientId);
+            return objectMapper.writeValueAsString(appts);
+        } catch (Exception e) {
+            return "{\"error\": \"" + e.getMessage() + "\"}";
+        }
+    }
+
+    @Tool(
+            name = "cancel_appointment",
+            description = "Cancel an appointment by appointment ID"
+    )
+    public String cancelAppointment(
+            @ToolParam(name = "appointment_id", description = "Numeric ID of the appointment") Long appointmentId
+    ) {
+        try {
+            Appointment cancelled = appointmentService.cancelAppointment(appointmentId);
+            return objectMapper.writeValueAsString(cancelled);
         } catch (Exception e) {
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
